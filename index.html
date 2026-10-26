@@ -1,0 +1,928 @@
+!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER DEFENSE PORTAL // INSPORTY_UZ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            matrix: {
+              black: '#030708',
+              dark: '#0a100d',
+              card: '#0d1813',
+              green: '#00ff66',
+              bright: '#33ff88',
+              dim: '#008833',
+              border: '#00441a',
+              accent: '#00e5ff',
+              danger: '#ff3344',
+              warning: '#ffcc00'
+            }
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #030708;
+      color: #00ff66;
+      font-family: 'JetBrains Mono', monospace;
+      overflow-x: hidden;
+    }
+    
+    /* CRT Scanline Effect */
+    .scanlines {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.35) 50%
+      ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.03),
+        rgba(0, 255, 0, 0.01),
+        rgba(0, 0, 255, 0.03)
+      );
+      background-size: 100% 3px, 6px 100%;
+      z-index: 40;
+    }
+
+    /* Glow utilities */
+    .text-glow {
+      text-shadow: 0 0 8px rgba(0, 255, 102, 0.7), 0 0 16px rgba(0, 255, 102, 0.3);
+    }
+    .text-glow-red {
+      text-shadow: 0 0 8px rgba(255, 51, 68, 0.8), 0 0 16px rgba(255, 51, 68, 0.4);
+    }
+    .text-glow-blue {
+      text-shadow: 0 0 8px rgba(0, 229, 255, 0.7), 0 0 16px rgba(0, 229, 255, 0.3);
+    }
+    .box-glow {
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.2), inset 0 0 15px rgba(0, 255, 102, 0.05);
+      border: 1px solid #00ff66;
+    }
+    .box-glow-red {
+      box-shadow: 0 0 18px rgba(255, 51, 68, 0.35), inset 0 0 15px rgba(255, 51, 68, 0.1);
+      border: 1px solid #ff3344;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #030708;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #006622;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00ff66;
+    }
+
+    canvas#matrix-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    @keyframes pulseWarning {
+      0%, 100% { border-color: #ff3344; box-shadow: 0 0 10px rgba(255,51,68,0.3); }
+      50% { border-color: #ffcc00; box-shadow: 0 0 20px rgba(255,204,0,0.6); }
+    }
+    .pulse-danger {
+      animation: pulseWarning 2s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-matrix-green selection:text-black">
+  <div class="scanlines"></div>
+  <canvas id="matrix-bg"></canvas>
+
+  <div class="relative z-10 flex flex-col min-h-screen">
+    
+    <!-- TOP HEADER / STATUS BAR -->
+    <header class="border-b border-matrix-border bg-matrix-dark/90 backdrop-blur-md sticky top-0 z-30 px-4 py-3">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- User Identity & Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded border border-matrix-danger bg-matrix-card flex items-center justify-center text-matrix-danger text-xl font-bold box-glow-red">
+            <i class="fa-solid fa-shield-halved animate-pulse"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs bg-red-950 text-matrix-danger px-1.5 py-0.5 rounded font-bold uppercase tracking-widest border border-matrix-danger">KIBER OGOHLIK</span>
+              <h1 class="text-lg font-extrabold text-white tracking-wide text-glow">insporty_uz</h1>
+            </div>
+            <p class="text-xs text-matrix-dim">CYBER DEFENSE & SAFETY CENTER // 2026</p>
+          </div>
+        </div>
+
+        <!-- Live Clock & Status Indicators -->
+        <div class="flex items-center gap-6">
+          <div class="hidden md:flex items-center gap-4 text-xs text-matrix-bright">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-matrix-danger animate-ping"></span>
+              <span class="text-matrix-danger font-bold">XAVF DARAJA: YUQORI</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-user-shield text-matrix-accent"></i>
+              <span>APK QO'RIQCHI: ZARUR</span>
+            </div>
+          </div>
+
+          <!-- Digital Matrix Clock -->
+          <div class="bg-matrix-card border border-matrix-border px-3 py-1.5 rounded flex items-center gap-2">
+            <i class="fa-regular fa-clock text-matrix-accent"></i>
+            <span id="live-clock" class="text-sm font-bold text-matrix-accent tracking-widest text-glow-blue">00:00:00</span>
+          </div>
+
+          <!-- Instagram Link @_craft_uz_ -->
+          <a href="https://instagram.com/_craft_uz_" target="_blank" rel="noopener noreferrer" 
+             class="bg-gradient-to-r from-matrix-border to-matrix-card hover:from-matrix-green hover:to-matrix-accent hover:text-black text-matrix-green border border-matrix-green px-3.5 py-1.5 rounded text-xs font-bold transition-all duration-300 flex items-center gap-2 box-glow group">
+            <i class="fa-brands fa-instagram text-base group-hover:scale-110 transition-transform"></i>
+            <span class="tracking-wider">@_craft_uz_ ga yozasiz</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="border-b border-matrix-border bg-matrix-black/80 backdrop-blur px-4 py-2 relative z-20">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+        <button onclick="switchTab('home')" id="tab-btn-home" 
+                class="tab-btn px-4 py-2 rounded text-xs font-bold transition-all flex items-center gap-2 border border-matrix-danger bg-matrix-danger text-white">
+          <i class="fa-solid fa-triangle-exclamation"></i> Bosh Sahifa (Ogohlantirish)
+        </button>
+        <button onclick="switchTab('tech')" id="tab-btn-tech" 
+                class="tab-btn px-4 py-2 rounded text-xs font-bold transition-all flex items-center gap-2 border border-matrix-border hover:border-matrix-green text-matrix-bright">
+          <i class="fa-solid fa-microchip"></i> Kompyuter Evolyutsiyasi (Referat)
+        </button>
+        <button onclick="switchTab('terminal')" id="tab-btn-terminal" 
+                class="tab-btn px-4 py-2 rounded text-xs font-bold transition-all flex items-center gap-2 border border-matrix-border hover:border-matrix-green text-matrix-bright">
+          <i class="fa-solid fa-terminal"></i> Chaqqon Terminal
+        </button>
+        <button onclick="switchTab('friendship')" id="tab-btn-friendship" 
+                class="tab-btn px-4 py-2 rounded text-xs font-bold transition-all flex items-center gap-2 border border-matrix-border hover:border-matrix-green text-matrix-bright">
+          <i class="fa-solid fa-heart-pulse"></i> Haqiqiy Do'stlik Hikoyalari
+        </button>
+        <button onclick="switchTab('gmail')" id="tab-btn-gmail" 
+                class="tab-btn px-4 py-2 rounded text-xs font-bold transition-all flex items-center gap-2 border border-matrix-border hover:border-matrix-green text-matrix-bright">
+          <i class="fa-solid fa-envelope"></i> Gmail Xabar Yuborish
+        </button>
+        <button onclick="switchTab('contact')" id="tab-btn-contact" 
+                class="tab-btn px-4 py-2 rounded text-xs font-bold transition-all flex items-center gap-2 border border-matrix-border hover:border-matrix-green text-matrix-bright">
+          <i class="fa-brands fa-instagram"></i> Instagram Aloqa
+        </button>
+      </div>
+    </nav>
+
+    <!-- GLOBAL TTS SPEECH BAR -->
+    <div class="bg-matrix-dark border-b border-matrix-border px-4 py-2 relative z-20">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <button id="global-tts-btn" onclick="toggleSpeechCurrentTab()" class="bg-matrix-card hover:bg-matrix-border border border-matrix-green text-matrix-green px-3 py-1 rounded flex items-center gap-2 transition box-glow">
+            <i id="tts-icon" class="fa-solid fa-volume-high"></i>
+            <span id="tts-text">OVOZDA O'QISH (TTS)</span>
+          </button>
+          <span id="speech-status" class="text-matrix-dim italic">Ovoz rejimi tayyor. Sahifadagi kiberxavfsizlik matnini eshitish uchun bosing.</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <label for="tts-lang" class="text-matrix-dim">Til:</label>
+          <select id="tts-lang" class="bg-matrix-black border border-matrix-border text-matrix-green text-xs rounded px-2 py-1 outline-none">
+            <option value="uz-UZ">O'zbekcha (Uzbek)</option>
+            <option value="en-US">English</option>
+          </select>
+          <button onclick="stopSpeech()" class="text-red-400 hover:text-red-300 px-2 py-1 border border-red-900 rounded">
+            <i class="fa-solid fa-stop"></i> Stop
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow p-4 md:p-6 max-w-7xl mx-auto w-full relative z-10">
+
+      <!-- ================= TAB 1: BOSH SAHIFA (KIBERXAVFSIZLIK OGOHLANTIRISHI) ================= -->
+      <section id="tab-home" class="tab-content space-y-6">
+        
+        <!-- Urgent Cyber Warning Banner -->
+        <div class="bg-matrix-dark border-2 border-matrix-danger rounded-lg p-6 md:p-8 pulse-danger relative overflow-hidden space-y-6">
+          
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-matrix-danger/40 pb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded bg-red-600/20 border border-matrix-danger flex items-center justify-center text-matrix-danger text-2xl font-bold">
+                <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+              </div>
+              <div>
+                <span class="text-xs bg-matrix-danger text-white font-extrabold px-2 py-0.5 rounded tracking-widest uppercase">Shoshilinch Ogohlantirish</span>
+                <h2 class="text-xl md:text-2xl font-extrabold text-white text-glow-red">KIBERXAVFSIZLIK VA SHAXSIY HIMOYA</h2>
+              </div>
+            </div>
+            <button onclick="speakSectionText('home-warning-text')" class="bg-matrix-danger hover:bg-red-500 text-white font-bold px-4 py-2 rounded text-xs flex items-center gap-2 box-glow-red transition">
+              <i class="fa-solid fa-volume-high"></i>
+              <span>OGOHLANTIRISHNI OVOZDA TINGLASH</span>
+            </button>
+          </div>
+
+          <!-- EXACT MANDATED UZBEK TEXT -->
+          <div id="home-warning-text" class="bg-matrix-black/90 p-5 md:p-6 rounded-lg border border-matrix-danger/60 space-y-4">
+            <p class="text-base md:text-lg text-white font-semibold leading-relaxed tracking-wide">
+              "Biz haqiqiy odammiz! Biz kiberxavfsizlikni ta'minlashimiz kerak. Hozir ham xavf-xatarlar mavjud. Telegramda yoki boshqa messenjerlarda kelgan noma'lum APK fayllarni aslo ochmang! Ular pullaringizni va shaxsiy ma'lumotlaringizni o'g'irlab, tarqatib yuborishi mumkin. Biz hozir APK Qo'riqchini (xavfsizlik dasturini) yuklashimiz kerak. Ogoh bo'ling, hozir 21-asrdamiz!"
+            </p>
+          </div>
+
+          <!-- Action Download Button for APK Qo'riqchi -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+            <div class="flex items-center gap-2 text-xs text-matrix-warning">
+              <i class="fa-solid fa-shield-virus text-base"></i>
+              <span>Kiber-firyakorlar va virusli APK fayllarga qarshi rasmiy himoya tizimi</span>
+            </div>
+            
+            <button onclick="downloadApkQoriqchi()" 
+                    class="bg-gradient-to-r from-matrix-green via-matrix-bright to-matrix-accent hover:opacity-90 text-black font-extrabold px-8 py-3.5 rounded-lg text-sm transition transform hover:scale-105 shadow-lg flex items-center gap-3 box-glow">
+              <i class="fa-solid fa-download text-lg"></i>
+              <span>APK QO'RIQCHINI YUKLASH (KIBER HIMOYACHI)</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Danger Awareness Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-matrix-card border border-matrix-danger rounded-lg p-5 box-glow-red space-y-2">
+            <div class="text-xs text-matrix-danger font-bold flex items-center gap-2">
+              <i class="fa-solid fa-bug"></i> NOMALUM APK FAYLLAR
+            </div>
+            <div class="text-sm font-bold text-white">Telegramdagi Tuzoqlar</div>
+            <p class="text-xs text-matrix-bright">
+              Telegram guruhlarida yoki shaxsiy xabarlarda kelgan har qanday .apk kengaytmali fayllar qurilmangizga troyan virusini o'rnatishi mumkin.
+            </p>
+          </div>
+
+          <div class="bg-matrix-card border border-matrix-warning rounded-lg p-5 box-glow space-y-2">
+            <div class="text-xs text-matrix-warning font-bold flex items-center gap-2">
+              <i class="fa-solid fa-building-columns"></i> BANK PLASTIK KARTALARI
+            </div>
+            <div class="text-sm font-bold text-white">Pul Yo'qotish Xavfi</div>
+            <p class="text-xs text-matrix-bright">
+              Zararli APK dasturlar SMS xabarlarni o'g'irlab, bank ilovalaringizdagi barcha mablag'larni yechib olishi mumkin.
+            </p>
+          </div>
+
+          <div class="bg-matrix-card border border-matrix-border rounded-lg p-5 box-glow space-y-2">
+            <div class="text-xs text-matrix-accent font-bold flex items-center gap-2">
+              <i class="fa-solid fa-user-lock"></i> OPERATOR INSPORTY_UZ
+            </div>
+            <div class="text-sm font-bold text-white">21-Asr Ogohligi</div>
+            <p class="text-xs text-matrix-bright">
+              Zamonaviy raqamli dunyoda shaxsiy kiberxavfsizlik qoidalariga rioya qilish har bir insonning asosiy burchidir.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 2: KOMPYUTER EVOLYUTSIYASI ================= -->
+      <section id="tab-tech" class="tab-content hidden space-y-6">
+        <div class="bg-matrix-dark border border-matrix-border p-6 rounded-lg space-y-4 box-glow">
+          <div class="flex items-center justify-between border-b border-matrix-border pb-3">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-laptop-code text-matrix-green"></i>
+              Kompyuter Texnologiyalari va Ularning Evolyutsiyasi (Referat)
+            </h2>
+            <button onclick="speakSectionText('tech-content')" class="text-xs bg-matrix-card hover:bg-matrix-border border border-matrix-green px-3 py-1.5 rounded text-matrix-green">
+              <i class="fa-solid fa-volume-high mr-1"></i> Bo'limni Tinglash
+            </button>
+          </div>
+
+          <div id="tech-content" class="space-y-6 text-sm text-matrix-bright leading-relaxed">
+            
+            <!-- Protsessorlar -->
+            <div class="bg-matrix-black p-4 rounded border border-matrix-border space-y-3">
+              <h3 class="text-base font-bold text-matrix-accent flex items-center gap-2">
+                <i class="fa-solid fa-microchip"></i> 1. Protsessor (CPU) — Kompyuterning Miyasi
+              </h3>
+              <p>
+                Protsessor barcha hisob-kitoblar, mantiqiy amallar va dasturiy buyruqlarni bajaradi. 2000-yildan bugungi kungacha bo'lgan davrda protsessorlar quyidagi ulkan evolyutsiyani bosib o'tdi:
+              </p>
+              <ul class="list-disc list-inside space-y-2 text-xs text-matrix-bright pl-2">
+                <li><strong class="text-white">2000-2005 ("Gigagertslar poygasi"):</strong> AMD Athlon va Intel Pentium III protsessorlari ilk bor 1 GHz chastota marrasini zabt etdi. Pentium 4 chastotasi 3.8 GHz gacha ko'tarildi, lekin yuqori harorat va elektr sarfi muammosiga ("Thermal Wall") duch kelindi.</li>
+                <li><strong class="text-white">2006-2012 (Ko'p yadroli arxitektura):</strong> Chastotani chegarasiz oshirish imkonsiz bo'lgach, bir chip ichiga Dual-Core (2 yadroli) va Quad-Core (4 yadroli) Core 2 Duo hamda Core i3/i5/i7 chiplari joylashtirildi. 64-bitli arxitekturaga to'liq o'tildi.</li>
+                <li><strong class="text-white">2020-2026 (ARM va NPU AI PC):</strong> Apple Silicon (M1-M4) va Qualcomm Snapdragon X Elite orqali energiyani tejovchi ARM arxitekturasi ommalashdi. Protsessorlar ichiga sun'iy intellekt vazifalarini bajaruvchi <span class="text-matrix-green font-bold">NPU (Neural Processing Unit)</span> chiplari qo'shildi.</li>
+              </ul>
+            </div>
+
+            <!-- Xotira -->
+            <div class="bg-matrix-black p-4 rounded border border-matrix-border space-y-3">
+              <h3 class="text-base font-bold text-matrix-accent flex items-center gap-2">
+                <i class="fa-solid fa-memory"></i> 2. Operativ va Doimiy Xotira Evolyutsiyasi
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="p-4 bg-matrix-card rounded border border-matrix-border space-y-2">
+                  <div class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sd-card text-matrix-green"></i> RAM (Operativ Xotira)
+                  </div>
+                  <p class="text-matrix-bright">
+                    Dasturlar ishlayotgan paytda vaqtincha ma'lumot saqlaydi. 2000-yillardagi 128 MB SDRAM xotiralardan bugungi 16 GB - 64 GB ultra-tezkor LPDDR5X xotiralariga erishildi.
+                  </p>
+                </div>
+                <div class="p-4 bg-matrix-card rounded border border-matrix-border space-y-2">
+                  <div class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-hard-drive text-matrix-accent"></i> NVMe SSD (Doimiy Xotira)
+                  </div>
+                  <p class="text-matrix-bright">
+                    Eski sekin ishlovchi HDD (80-120 MB/s) magnit disklar o'rnini PCIe Gen4 va Gen5 shinasida ishlovchi ultra-tezkor NVMe M.2 SSD (7,000 - 14,000 MB/s) xotiralar egalladi.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI PC -->
+            <div class="bg-matrix-black p-4 rounded border border-matrix-border space-y-2">
+              <h3 class="text-base font-bold text-matrix-accent flex items-center gap-2">
+                <i class="fa-solid fa-brain"></i> 3. Sun'iy Intellekt Kompyuterlari (AI PC)
+              </h3>
+              <p>
+                Zamonaviy kompyuterlar internetga ulanmasdan turib, lokal sun'iy intellekt modellarini ishlatish, ovozni matnga aylantirish hamda real vaqt rejimida tarjima qilish imkoniyatiga ega.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: CHAQQON TERMINAL ================= -->
+      <section id="tab-terminal" class="tab-content hidden space-y-6">
+        <div class="bg-matrix-dark border border-matrix-green rounded-lg p-4 md:p-6 box-glow relative overflow-hidden">
+          <div class="flex items-center justify-between border-b border-matrix-border pb-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+              <span class="text-xs text-matrix-bright font-bold ml-2">root@insporty_uz:~# CHAQQON_TERMINAL</span>
+            </div>
+            <div class="text-xs text-matrix-dim">BUYRUQLAR UCHUN 'help' DEB YOZING</div>
+          </div>
+
+          <!-- Console Output Window -->
+          <div id="terminal-output" class="bg-matrix-black p-4 rounded border border-matrix-border h-64 overflow-y-auto font-mono text-xs md:text-sm space-y-2 text-matrix-bright mb-4">
+            <div class="text-matrix-green">[SYSTEM INITIALIZED] Welcome Operator <span class="text-white font-bold">insporty_uz</span>.</div>
+            <div class="text-matrix-danger font-bold">[SECURITY WARNING] Noma'lum Telegram APK fayllarini aslo ochmang!</div>
+            <div class="text-matrix-accent">Mavjud buyruqlar: 'help', 'apk', 'cpu', 'friendship', 'gmail', 'speak', 'clear', 'time', 'matrix'</div>
+          </div>
+
+          <!-- Input Command Box -->
+          <form onsubmit="handleCommand(event)" class="flex items-center gap-2">
+            <span class="text-matrix-green font-bold text-sm md:text-base">insporty_uz@cyber:~$</span>
+            <input type="text" id="terminal-input" placeholder="Buyruq kiriting (masalan: help, apk, cpu, friendship)..." 
+                   class="flex-grow bg-matrix-black border border-matrix-border rounded px-3 py-2 text-matrix-green focus:outline-none focus:border-matrix-green font-mono text-sm">
+            <button type="submit" class="bg-matrix-border hover:bg-matrix-green hover:text-black border border-matrix-green text-matrix-green px-4 py-2 rounded text-xs font-bold transition">
+              EXEC
+            </button>
+          </form>
+
+          <!-- Quick Action Buttons -->
+          <div class="mt-4 flex flex-wrap gap-2 text-xs">
+            <span class="text-matrix-dim self-center">Tezkor tugmalar:</span>
+            <button onclick="executeQuickCommand('help')" class="bg-matrix-card hover:border-matrix-green border border-matrix-border text-matrix-bright px-2.5 py-1 rounded">help</button>
+            <button onclick="executeQuickCommand('apk')" class="bg-matrix-card hover:border-matrix-danger border border-matrix-danger text-matrix-danger font-bold px-2.5 py-1 rounded">apk</button>
+            <button onclick="executeQuickCommand('cpu')" class="bg-matrix-card hover:border-matrix-green border border-matrix-border text-matrix-bright px-2.5 py-1 rounded">cpu</button>
+            <button onclick="executeQuickCommand('friendship')" class="bg-matrix-card hover:border-matrix-green border border-matrix-border text-matrix-bright px-2.5 py-1 rounded">friendship</button>
+            <button onclick="executeQuickCommand('gmail')" class="bg-matrix-card hover:border-matrix-green border border-matrix-border text-matrix-bright px-2.5 py-1 rounded">gmail</button>
+            <button onclick="executeQuickCommand('time')" class="bg-matrix-card hover:border-matrix-green border border-matrix-border text-matrix-bright px-2.5 py-1 rounded">time</button>
+            <button onclick="executeQuickCommand('clear')" class="bg-matrix-card hover:border-matrix-green border border-matrix-border text-matrix-bright px-2.5 py-1 rounded">clear</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: HAQIQIY DO'STLIK HIKOYALARI ================= -->
+      <section id="tab-friendship" class="tab-content hidden space-y-6">
+        <div class="bg-matrix-dark border border-matrix-border p-6 rounded-lg space-y-6 box-glow">
+          <div class="flex items-center justify-between border-b border-matrix-border pb-3">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-handshake text-matrix-green"></i>
+                Haqiqiy Do'stlik Haqida Ta'sirli Hikoyalar
+              </h2>
+              <p class="text-xs text-matrix-dim mt-1">Sadoqat, ishonch va bir-birini qo'llab-quvvatlash haqida</p>
+            </div>
+            <button onclick="speakSectionText('friendship-stories')" class="text-xs bg-matrix-card hover:bg-matrix-border border border-matrix-green px-3 py-1.5 rounded text-matrix-green">
+              <i class="fa-solid fa-volume-high mr-1"></i> Hikoyalarni Tinglash
+            </button>
+          </div>
+
+          <div id="friendship-stories" class="space-y-6">
+            
+            <!-- Story 1 -->
+            <article class="bg-matrix-black p-5 rounded-lg border border-matrix-border space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-matrix-accent flex items-center gap-2">
+                  <i class="fa-solid fa-quote-left"></i> 1. Tungi Dastur va Sadoqatli Do'st
+                </h3>
+                <span class="text-xs text-matrix-dim">Ajoyib Hikoya</span>
+              </div>
+              <p class="text-sm text-matrix-bright leading-relaxed">
+                Uzoq yillar ilgari ikki do'st birgalikda texnologiya sohasida loyiha boshlashgan edi. Topshirishga bir necha soat qolganda do'stlardan birining kompyuteri o'chib qoladi va loyiha yo'qolish xavfi ostida qoladi. Ikkinchi do'st o'z ishini chetga surib, tun bo'yi uning yonida o'tirib, loyihani qayta tiklashga yordam beradi. Ertalab loyiha muvaffaqiyatli topshirilgach: <em>"Do'stlik — muvaffaqiyatda birga bo'lish emas, qiyinchilikda birinchi bo'lib qo'l uzatishdir."</em>
+              </p>
+              <div class="flex items-center justify-between text-xs text-matrix-dim pt-2 border-t border-matrix-border/40">
+                <span>Muallif: Cyber Stories</span>
+                <button onclick="speakText('Do\'stlik — muvaffaqiyatda birga bo\'lish emas, qiyinchilikda birinchi bo\'lib qo\'l uzatishdir.')" class="text-matrix-green hover:underline">
+                  <i class="fa-solid fa-play mr-1"></i> Iqtibosni eshitish
+                </button>
+              </div>
+            </article>
+
+            <!-- Story 2 -->
+            <article class="bg-matrix-black p-5 rounded-lg border border-matrix-border space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-matrix-accent flex items-center gap-2">
+                  <i class="fa-solid fa-shield-heart"></i> 2. insporty_uz va @_craft_uz_ Aloqasi
+                </h3>
+                <span class="text-xs text-matrix-dim">Do'stlik Tamoyili</span>
+              </div>
+              <p class="text-sm text-matrix-bright leading-relaxed">
+                Haqiqiy do'stlik shunchaki birga vaqt o'tkazish emas. U bir-biriga samimiy ishonch bildirgan holda birgalikda rivojlanish va yangi cho'qqilarni zabt etishdir. <span class="text-white font-bold">insporty_uz</span> hamda <span class="text-white font-bold">@_craft_uz_</span> hamkorligi ham aynan shunday samimiyat va do'stlik poydevoriga qurilgan.
+              </p>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: GMAIL XABAR YUBORISH ================= -->
+      <section id="tab-gmail" class="tab-content hidden space-y-6">
+        <div class="bg-matrix-dark border border-matrix-green p-6 rounded-lg space-y-6 box-glow">
+          
+          <div class="flex items-center justify-between border-b border-matrix-border pb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded bg-red-600/20 border border-red-500 flex items-center justify-center text-red-500 font-bold">
+                <i class="fa-solid fa-envelope"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-white">SECURE GMAIL DISPATCH GATEWAY</h2>
+                <p class="text-xs text-matrix-dim">Encrypted SMTP Gateway & Mailto Dispatcher</p>
+              </div>
+            </div>
+            <span class="text-xs bg-matrix-black border border-matrix-green text-matrix-green px-2.5 py-1 rounded font-mono">
+              STATUS: READY
+            </span>
+          </div>
+
+          <!-- Gmail Form -->
+          <form onsubmit="handleSendEmail(event)" class="space-y-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-matrix-bright mb-1">YUBORUVCHI ISMI / GMAIL:</label>
+                <input type="text" id="gmail-sender" required value="insporty_uz@gmail.com" 
+                       class="w-full bg-matrix-black border border-matrix-border rounded px-3 py-2 text-matrix-green text-sm focus:outline-none focus:border-matrix-green">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-matrix-bright mb-1">QABUL QILUVCHI HAQIQIY GMAIL:</label>
+                <input type="email" id="gmail-target" required placeholder="target@gmail.com" value="target.operator2026@gmail.com" 
+                       class="w-full bg-matrix-black border border-matrix-border rounded px-3 py-2 text-matrix-green text-sm focus:outline-none focus:border-matrix-green">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-matrix-bright mb-1">XABAR MAVZUSI (SUBJECT):</label>
+              <input type="text" id="gmail-subject" required value="CYBER REPORT // Kiberxavfsizlik va APK Ogohlantirish" 
+                     class="w-full bg-matrix-black border border-matrix-border rounded px-3 py-2 text-matrix-green text-sm focus:outline-none focus:border-matrix-green">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-matrix-bright mb-1">XABAR MATNI (PAYLOAD CONTENT):</label>
+              <textarea id="gmail-message" rows="5" required 
+                        class="w-full bg-matrix-black border border-matrix-border rounded p-3 text-matrix-green text-sm focus:outline-none focus:border-matrix-green font-mono">
+Assalomu alaykum!
+
+Ushbu xabar insporty_uz Matrix Cyber Portal orqali yuborilmoqda.
+Kiberxavfsizlik ogohlantirishi: Telegramda kelgan noma'lum APK fayllarni ochmang!
+
+Instagram aloqa: @_craft_uz_ ga yozasiz.
+Status: Shifrlangan holda yuborildi.
+              </textarea>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+              <div class="flex items-center gap-2 text-xs text-matrix-dim">
+                <i class="fa-solid fa-lock text-matrix-green"></i>
+                <span>SSL/TLS 256-bit shifrlash faol</span>
+              </div>
+              <button type="submit" id="gmail-send-btn" 
+                      class="bg-matrix-green hover:bg-matrix-bright text-black font-extrabold px-6 py-2.5 rounded text-sm transition flex items-center gap-2 box-glow">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>GMAILGA YUBORISH</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Gmail Dispatch Console Logs -->
+          <div id="gmail-logs-container" class="hidden space-y-2 pt-4 border-t border-matrix-border">
+            <div class="text-xs font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-network-wired text-matrix-accent"></i>
+              <span>TRANSMISSION CONSOLE LOGS:</span>
+            </div>
+            <div id="gmail-logs" class="bg-matrix-black p-3 rounded border border-matrix-border font-mono text-xs text-matrix-bright h-36 overflow-y-auto space-y-1">
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 6: INSTAGRAM ALOQA ================= -->
+      <section id="tab-contact" class="tab-content hidden space-y-6">
+        <div class="bg-matrix-dark border border-matrix-border p-6 rounded-lg text-center space-y-6 box-glow">
+          <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-yellow-500 via-rose-500 to-purple-600 flex items-center justify-center text-white text-4xl box-glow-cyan">
+            <i class="fa-brands fa-instagram"></i>
+          </div>
+          <div class="space-y-2">
+            <h2 class="text-2xl font-bold text-white">INSTAGRAM ORQALI BOG'LANISH</h2>
+            <p class="text-base text-matrix-green font-bold text-glow">
+              @_craft_uz_ ga yozasiz
+            </p>
+            <p class="text-xs text-matrix-bright max-w-md mx-auto">
+              Sizda biror savol, loyiha yoki kiberxavfsizlik bo'yicha hamkorlik taklifi bo'lsa, quyidagi tugma orqali to'g'ridan-to'g'ri Instagram sahifamizga o'tib yozishingiz mumkin.
+            </p>
+          </div>
+          <div>
+            <a href="https://instagram.com/_craft_uz_" target="_blank" rel="noopener noreferrer" 
+               class="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold px-8 py-3 rounded-lg text-sm transition transform hover:scale-105 shadow-lg">
+              <i class="fa-brands fa-instagram text-xl"></i>
+              <span>@_craft_uz_ SAHIFASIGA O'TISH</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER / SOCIAL BAR -->
+    <footer class="border-t border-matrix-border bg-matrix-dark/90 backdrop-blur py-4 px-4 relative z-20 mt-8">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs text-matrix-dim">
+        <div class="flex items-center gap-3">
+          <span class="text-matrix-green font-bold">Operator: insporty_uz</span>
+          <span>© 2026 Cyber Security Portal</span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <a href="https://instagram.com/_craft_uz_" target="_blank" class="hover:text-matrix-green transition flex items-center gap-1.5">
+            <i class="fa-brands fa-instagram text-matrix-green"></i>
+            <span>@_craft_uz_ ga yozasiz</span>
+          </a>
+          <span>|</span>
+          <span class="text-matrix-bright">21-Asr Kiberxavfsizlik Platformasi</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // ================= 1. MATRIX RAIN ANIMATION =================
+    const canvas = document.getElementById('matrix-bg');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const characters = katakana.split('');
+    const fontSize = 14;
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops = [];
+
+    function initDrops() {
+      columns = Math.floor(canvas.width / fontSize);
+      drops = [];
+      for (let i = 0; i < columns; i++) {
+        drops[i] = Math.floor(Math.random() * -100);
+      }
+    }
+    initDrops();
+
+    let matrixSpeed = 33;
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(3, 7, 8, 0.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#00ff66';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = characters[Math.floor(Math.random() * characters.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        ctx.fillText(text, x, y);
+
+        if (y > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    let matrixInterval = setInterval(drawMatrix, matrixSpeed);
+
+    // ================= 2. LIVE DIGITAL CLOCK =================
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('live-clock').innerText = `${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ================= 3. TAB SWITCHING =================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-matrix-green', 'bg-matrix-danger', 'text-black', 'text-white');
+        btn.classList.add('border-matrix-border', 'text-matrix-bright');
+      });
+
+      const activeTab = document.getElementById('tab-' + tabId);
+      const activeBtn = document.getElementById('tab-btn-' + tabId);
+
+      if (activeTab && activeBtn) {
+        activeTab.classList.remove('hidden');
+        activeBtn.classList.remove('border-matrix-border', 'text-matrix-bright');
+        if (tabId === 'home') {
+          activeBtn.classList.add('bg-matrix-danger', 'text-white', 'border-matrix-danger');
+        } else {
+          activeBtn.classList.add('bg-matrix-green', 'text-black', 'border-matrix-green');
+        }
+      }
+
+      stopSpeech();
+    }
+
+    // ================= 4. TEXT-TO-SPEECH (TTS) SYNTHESIS =================
+    let synth = window.speechSynthesis;
+    let isSpeaking = false;
+
+    function speakText(textToSpeak) {
+      if (!synth) {
+        alert("Brauzeringizda Ovozli o'qish (Speech Synthesis) qo'llab-quvvatlanmaydi.");
+        return;
+      }
+
+      stopSpeech();
+
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      const selectedLang = document.getElementById('tts-lang').value || 'uz-UZ';
+      utterance.lang = selectedLang;
+      utterance.rate = 0.95; // Slightly slower for clear Uzbek speech
+      utterance.pitch = 1.0;
+
+      utterance.onstart = () => {
+        isSpeaking = true;
+        document.getElementById('tts-text').innerText = "O'QILMOQDA...";
+        document.getElementById('speech-status').innerText = "Ovoz ijro etilmoqda...";
+      };
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        document.getElementById('tts-text').innerText = "OVOZDA O'QISH (TTS)";
+        document.getElementById('speech-status').innerText = "Ovoz tugatildi.";
+      };
+
+      utterance.onerror = () => {
+        isSpeaking = false;
+        document.getElementById('tts-text').innerText = "OVOZDA O'QISH (TTS)";
+      };
+
+      synth.speak(utterance);
+    }
+
+    function stopSpeech() {
+      if (synth && synth.speaking) {
+        synth.cancel();
+      }
+      isSpeaking = false;
+      document.getElementById('tts-text').innerText = "OVOZDA O'QISH (TTS)";
+      document.getElementById('speech-status').innerText = "To'xtatildi.";
+    }
+
+    function toggleSpeechCurrentTab() {
+      if (isSpeaking) {
+        stopSpeech();
+        return;
+      }
+
+      let textToRead = "";
+      const activeTab = document.querySelector('.tab-content:not(.hidden)');
+      if (activeTab) {
+        textToRead = activeTab.innerText;
+      } else {
+        textToRead = "insporty_uz kiberxavfsizlik portaliga xush kelibsiz!";
+      }
+
+      speakText(textToRead);
+    }
+
+    function speakSectionText(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        speakText(el.innerText);
+      }
+    }
+
+    // ================= 5. APK QO'RIQCHI SIMULATED DOWNLOAD =================
+    function downloadApkQoriqchi() {
+      speakText("APK Qo'riqchi kiber xavfsizlik dasturini yuklash boshlandi. Ogoh bo'ling!");
+      
+      const element = document.createElement('a');
+      const fileContent = `=== APK QO'RIQCHI // CYBER GUARDIAN 2026 ===\nUser: insporty_uz\nStatus: Active Defense Installed.\nWarning: Never open unknown .apk files from Telegram or messaging apps. Protect your data and financial accounts!`;
+      const file = new Blob([fileContent], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = "APK_Qoriqchi_CyberGuard.txt";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+
+    // ================= 6. INTERACTIVE TERMINAL SHELL =================
+    function appendLog(text, type = 'normal') {
+      const output = document.getElementById('terminal-output');
+      const div = document.createElement('div');
+      
+      if (type === 'cmd') {
+        div.className = "text-white font-bold";
+        div.innerText = `insporty_uz@cyber:~$ ${text}`;
+      } else if (type === 'error') {
+        div.className = "text-red-400 font-bold";
+        div.innerText = text;
+      } else if (type === 'accent') {
+        div.className = "text-matrix-accent";
+        div.innerText = text;
+      } else {
+        div.className = "text-matrix-bright";
+        div.innerText = text;
+      }
+
+      output.appendChild(div);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function handleCommand(e) {
+      e.preventDefault();
+      const input = document.getElementById('terminal-input');
+      const cmd = input.value.trim().toLowerCase();
+      if (!cmd) return;
+
+      appendLog(cmd, 'cmd');
+      input.value = '';
+
+      processCommand(cmd);
+    }
+
+    function executeQuickCommand(cmd) {
+      appendLog(cmd, 'cmd');
+      processCommand(cmd);
+    }
+
+    function processCommand(cmd) {
+      switch (cmd) {
+        case 'help':
+          appendLog("Mavjud buyruqlar:");
+          appendLog("  help       - Barcha buyruqlar ro'yxati");
+          appendLog("  apk        - Kiberxavfsizlik ogohlantirishini ko'rish va yuklash");
+          appendLog("  cpu        - Kompyuter va protsessor evolyutsiyasini ko'rish");
+          appendLog("  friendship - Do'stlik hikoyalari bo'limini ochish");
+          appendLog("  gmail      - Gmail dispatcher bo'limini ochish");
+          appendLog("  speak      - Ekrandagi matnni ovozda o'qish");
+          appendLog("  time       - Hozirgi vaqtni ko'rish");
+          appendLog("  matrix     - Matrix tezligini almashish");
+          appendLog("  clear      - Konsolni tozalash");
+          break;
+
+        case 'apk':
+        case 'warning':
+          switchTab('home');
+          appendLog("OGOHLANTIRISH: Telegramda kelgan noma'lum APK fayllarni ochmang!", 'error');
+          break;
+
+        case 'cpu':
+        case 'tech':
+          switchTab('tech');
+          appendLog("Kompyuter evolyutsiyasi bo'limi ochildi.", 'accent');
+          break;
+
+        case 'friendship':
+          switchTab('friendship');
+          appendLog("Do'stlik hikoyalari bo'limi ochildi.", 'accent');
+          break;
+
+        case 'gmail':
+        case 'sendmail':
+          switchTab('gmail');
+          appendLog("Gmail yuborish moduli ochildi.", 'accent');
+          break;
+
+        case 'time':
+          appendLog(`Joriy vaqt: ${new Date().toLocaleTimeString()}`, 'accent');
+          break;
+
+        case 'clear':
+          document.getElementById('terminal-output').innerHTML = '';
+          appendLog("[CONSOLE CLEARED]");
+          break;
+
+        case 'speak':
+          toggleSpeechCurrentTab();
+          break;
+
+        case 'matrix':
+          clearInterval(matrixInterval);
+          matrixSpeed = matrixSpeed === 33 ? 15 : 33;
+          matrixInterval = setInterval(drawMatrix, matrixSpeed);
+          appendLog(`Matrix yomg'iri tezligi: ${matrixSpeed}ms`, 'accent');
+          break;
+
+        default:
+          appendLog(`Noma'lum buyruq: '${cmd}'. 'help' deb yozing.`, 'error');
+          break;
+      }
+    }
+
+    // ================= 7. REALISTIC GMAIL DISPATCHER =================
+    function handleSendEmail(e) {
+      e.preventDefault();
+
+      const sender = document.getElementById('gmail-sender').value;
+      const target = document.getElementById('gmail-target').value;
+      const subject = document.getElementById('gmail-subject').value;
+      const message = document.getElementById('gmail-message').value;
+
+      const container = document.getElementById('gmail-logs-container');
+      const logs = document.getElementById('gmail-logs');
+      const sendBtn = document.getElementById('gmail-send-btn');
+
+      container.classList.remove('hidden');
+      logs.innerHTML = '';
+
+      function addGmailLog(text, isGreen = false) {
+        const p = document.createElement('p');
+        p.className = isGreen ? 'text-matrix-green font-bold' : 'text-matrix-dim';
+        p.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+        logs.appendChild(p);
+        logs.scrollTop = logs.scrollHeight;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.classList.add('opacity-50');
+
+      addGmailLog(`SMTP Handshake: Connection to gmail-smtp-in.l.google.com...`);
+      
+      setTimeout(() => {
+        addGmailLog(`Encrypting payload using RSA-256 (From: ${sender} -> To: ${target})...`);
+      }, 600);
+
+      setTimeout(() => {
+        addGmailLog(`Sending message payload through TLS channel...`);
+      }, 1200);
+
+      setTimeout(() => {
+        addGmailLog(`DISPATCH SUCCESSFUL! Mail queued for ${target}.`, true);
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('opacity-50');
+
+        speakText("Gmail xabari muvaffaqiyatli yuborildi!");
+
+        // Mailto fallback
+        const mailtoUrl = `mailto:${encodeURIComponent(target)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+        window.open(mailtoUrl, '_blank');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
